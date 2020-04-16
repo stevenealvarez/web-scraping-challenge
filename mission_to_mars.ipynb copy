@@ -1,0 +1,435 @@
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#import dependencies\n",
+    "\n",
+    "from bs4 import BeautifulSoup as bs\n",
+    "from splinter import Browser\n",
+    "import requests\n",
+    "import pandas as pd\n",
+    "import time"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "executable_path = {'executable_path': '/usr/local/bin/chromedriver'}\n",
+    "browser= Browser('chrome', **executable_path, headless=False)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "url='https://mars.nasa.gov/news/'\n",
+    "browser.visit(url)\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "html= browser.html\n",
+    "soup= bs(html, 'html.parser')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "NASA MARS NEWS "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Mars Now\n",
+      "\n",
+      "A mission to investigate key questions about potential life on Mars.\n"
+     ]
+    }
+   ],
+   "source": [
+    "#this way it avoided getting none for paragraph\n",
+    "news_title = soup.find('div', class_='content_title').text.strip()\n",
+    "news_p= soup.find('div', class_=\"rollover_description_inner\").text.strip()\n",
+    "\n",
+    "print(news_title)\n",
+    "print(\"\\n\"+news_p)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "JP MARS IMAGE URL"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#url for image \n",
+    "url= 'https://www.jpl.nasa.gov/spaceimages/?search=&category=Mars'\n",
+    "browser.visit(url)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "html_image= browser.html\n",
+    "soup= bs(html_image, 'html.parser')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#like activity in class click\n",
+    "#full_img= browser.find_by_id(\"full_image\")\n",
+    "#full_img.click()\n",
+    "#time.sleep(2)\n",
+    "#browser.click_link_by_partial_text('more info')\n",
+    "\n",
+    "#url_img= soup.find('div', class_=\"main_image\")['src']\n",
+    "#featured_image_url= \"https://www.jpl.nasa.gov\" + url_img\n",
+    "#featured_image_url\n",
+    "\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 9,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "'https://www.jpl.nasa.gov/spaceimages/images/wallpaper/PIA17044-1920x1200.jpg'"
+      ]
+     },
+     "execution_count": 9,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "#attempted to click through the web but was not successful with above code\n",
+    "img= soup.find('div',class_='carousel_items')('article')[0]['style'].\\\n",
+    "    replace('background-image: url(','').replace(');','')[1:-1]\n",
+    "nasa_url= 'https://www.jpl.nasa.gov'\n",
+    "\n",
+    "featured_img_url= nasa_url + img\n",
+    "featured_img_url\n",
+    "\n",
+    "\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "MARS WEATHER TWEET"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 10,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "url='https://twitter.com/marswxreport?lang=en'\n",
+    "browser.visit(url)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 11,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "'“It\\'s classic, textbook NASA, We\\'re presented with a problem and we figure out how to make things work. Mars isn\\'t standing still for us; we\\'re still exploring.\" MER Science Operations Team Chief.https://mars.nasa.gov/news/8647/nasas-curiosity-keeps-rolling-as-team-operates-rover-from-home/\\xa0…'"
+      ]
+     },
+     "execution_count": 11,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "url='https://twitter.com/marswxreport?lang=en'\n",
+    "response= requests.get(url)\n",
+    "soup= bs(response.text, 'lxml')\n",
+    "\n",
+    "mars_weather= soup.find('p', class_=\"TweetTextSize\").text\n",
+    "mars_weather"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "MARS FACTS"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 12,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>0</th>\n",
+       "      <th>1</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>Diameter:</td>\n",
+       "      <td>3,475 km</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>Mass:</td>\n",
+       "      <td>7.35 × 10^22 kg (0.01 Earths)</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>Orbits:</td>\n",
+       "      <td>The Earth</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>Orbit Distance:</td>\n",
+       "      <td>384,400 km</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>Orbit Period:</td>\n",
+       "      <td>27.3 days</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>5</th>\n",
+       "      <td>Surface Temperature:</td>\n",
+       "      <td>-233 to 123 °C</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "                      0                              1\n",
+       "0             Diameter:                       3,475 km\n",
+       "1                 Mass:  7.35 × 10^22 kg (0.01 Earths)\n",
+       "2               Orbits:                      The Earth\n",
+       "3       Orbit Distance:                     384,400 km\n",
+       "4         Orbit Period:                      27.3 days\n",
+       "5  Surface Temperature:                 -233 to 123 °C"
+      ]
+     },
+     "execution_count": 12,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "#https://space-facts.com/mars/\n",
+    "#use pandas to scrape the table \n",
+    "\n",
+    "facts_table_df= pd.read_html('https://space-facts.com/mars/')[1]\n",
+    "facts_table_df"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 13,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "'<table border=\"1\" class=\"dataframe\">\\n  <thead>\\n    <tr style=\"text-align: right;\">\\n      <th></th>\\n      <th>Mars Variables</th>\\n      <th>Values</th>\\n    </tr>\\n  </thead>\\n  <tbody>\\n    <tr>\\n      <th>0</th>\\n      <td>Diameter:</td>\\n      <td>3,475 km</td>\\n    </tr>\\n    <tr>\\n      <th>1</th>\\n      <td>Mass:</td>\\n      <td>7.35 × 10^22 kg (0.01 Earths)</td>\\n    </tr>\\n    <tr>\\n      <th>2</th>\\n      <td>Orbits:</td>\\n      <td>The Earth</td>\\n    </tr>\\n    <tr>\\n      <th>3</th>\\n      <td>Orbit Distance:</td>\\n      <td>384,400 km</td>\\n    </tr>\\n    <tr>\\n      <th>4</th>\\n      <td>Orbit Period:</td>\\n      <td>27.3 days</td>\\n    </tr>\\n    <tr>\\n      <th>5</th>\\n      <td>Surface Temperature:</td>\\n      <td>-233 to 123 °C</td>\\n    </tr>\\n  </tbody>\\n</table>'"
+      ]
+     },
+     "execution_count": 13,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "#column names and df to html\n",
+    "facts_table_df.columns=['Mars Variables', 'Values']\n",
+    "facts_table_df\n",
+    "\n",
+    "mars_facts= facts_table_df.to_html()\n",
+    "mars_facts"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "MARS HEMISPHERES"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 14,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "url= 'https://astrogeology.usgs.gov/search/results?q=hemisphere+enhanced&k1=target&v1=Mars'\n",
+    "browser.visit(url)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 15,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "html=browser.html\n",
+    "soup= bs(html, 'html.parser')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 16,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#loop through and find all for the hemisphere titles and images\n",
+    "hemisphere_image_urls=[]\n",
+    "results=soup.find ('div', class_='result-list')\n",
+    "hemispheres=results.find_all('div',{'class':'item'})\n",
+    "\n",
+    "for hemisphere in hemispheres:\n",
+    "    title = hemisphere.find(\"h3\").text\n",
+    "    end_link = hemisphere.find(\"a\")[\"href\"]\n",
+    "    image_link = \"https://astrogeology.usgs.gov/\" + end_link    \n",
+    "    browser.visit(image_link)\n",
+    "    html_hemispheres = browser.html\n",
+    "    soup=bs(html_hemispheres, \"html.parser\")\n",
+    "    downloads = soup.find(\"div\", class_=\"downloads\")\n",
+    "    image_url = downloads.find(\"a\")[\"href\"]\n",
+    "    hemisphere_image_urls.append({\"title\": title, \"img_url\": image_url})\n",
+    "    "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 17,
+   "metadata": {
+    "scrolled": true
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "[{'title': 'Cerberus Hemisphere Enhanced',\n",
+       "  'img_url': 'http://astropedia.astrogeology.usgs.gov/download/Mars/Viking/cerberus_enhanced.tif/full.jpg'},\n",
+       " {'title': 'Schiaparelli Hemisphere Enhanced',\n",
+       "  'img_url': 'http://astropedia.astrogeology.usgs.gov/download/Mars/Viking/schiaparelli_enhanced.tif/full.jpg'},\n",
+       " {'title': 'Syrtis Major Hemisphere Enhanced',\n",
+       "  'img_url': 'http://astropedia.astrogeology.usgs.gov/download/Mars/Viking/syrtis_major_enhanced.tif/full.jpg'},\n",
+       " {'title': 'Valles Marineris Hemisphere Enhanced',\n",
+       "  'img_url': 'http://astropedia.astrogeology.usgs.gov/download/Mars/Viking/valles_marineris_enhanced.tif/full.jpg'}]"
+      ]
+     },
+     "execution_count": 17,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "#hemisphere urls with titles\n",
+    "hemisphere_image_urls"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "\n",
+    "    "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.6.10"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 4
+}
